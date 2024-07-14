@@ -1,0 +1,13 @@
+[package]
+name = "music_dumper"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+members = [
+    "./music_dump_lib"
+]
+
+[dependencies]
+base64 = "0.22.1"
+aes = "0.8.4"
