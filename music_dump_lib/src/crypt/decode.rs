@@ -15,23 +15,24 @@ pub fn aes128_decrypt(encrypted: Vec<u8>, key: &[u8; 16]) -> Result<Vec<u8>, Cry
     Ok(result)
 }
 
-fn rc4_expected(key: &[u8]) -> Vec<usize> {
-    let mut last_byte = 0;
-    let mut key_box = (0..256).collect::<Vec<usize>>();
-    let mut offsets = (0..key.len()).cycle();
-    for i in 0..256 {
-        let offset = offsets.next().unwrap();
-        let c = (key_box[i] + last_byte + key[offset] as usize) & 0xff;
-        key_box.swap(i, c);
-        last_byte = c;
-    }
-    key_box
-}
 
 #[cfg(test)]
 mod test{
     use super::*;
 
+    fn rc4_expected(key: &[u8]) -> Vec<usize> {
+        let mut last_byte = 0;
+        let mut key_box = (0..256).collect::<Vec<usize>>();
+        let mut offsets = (0..key.len()).cycle();
+        for i in 0..256 {
+            let offset = offsets.next().unwrap();
+            let c = (key_box[i] + last_byte + key[offset] as usize) & 0xff;
+            key_box.swap(i, c);
+            last_byte = c;
+        }
+        key_box
+    }
+    
     #[test]
     fn rc4_test() {
 
