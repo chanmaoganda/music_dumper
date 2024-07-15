@@ -14,3 +14,5 @@ base64 = "0.22.1"
 aes = "0.8.4"
 cipher = { version = "^0.4", features = ["alloc", "block-padding"] }
 thiserror = "1.0.62"
+serde = { version = "1.0.204", features = ["derive"] }
+serde_json = { version = "1.0.120" }
