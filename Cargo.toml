@@ -8,6 +8,9 @@ members = [
     "./music_dump_lib"
 ]
 
-[dependencies]
+[workspace.dependencies]
+anyhow = "1.0.43"
 base64 = "0.22.1"
 aes = "0.8.4"
+cipher = { version = "^0.4", features = ["alloc", "block-padding"] }
+thiserror = "1.0.62"
