@@ -11,3 +11,4 @@ cipher = { workspace = true }
 thiserror = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+id3 = { workspace = true }

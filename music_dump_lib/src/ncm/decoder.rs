@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::Read;
+use std::io::{Read, Seek};
 
 use crate::{aes128_decrypt, base64_decode};
 use crate::error::NcmDecodeError;
@@ -26,6 +26,8 @@ impl NcmDecoder {
         self.parse_header()?;
         let rc4 = self.parse_rc4_handler()?;
         let ncm_info = self.parse_music_info()?;
+        let _ = self.take_next_bytes(9)?;
+        let image_info = self.parse_image_info()?;
         Ok(())
     }
 
@@ -36,20 +38,29 @@ impl NcmDecoder {
         if header_size != 10 {
             return Err(NcmDecodeError::InvalidHeader);
         }
+        assert_eq!(self.reader.stream_position().unwrap(), 10);
         Ok(())
     }
 
     fn parse_rc4_handler(&mut self) -> Result<Rc4, NcmDecodeError> {
         let encrypted_key = self.get_encrypted_rc4_key()?;
         let rc4_key = self.decrypt_rc4_key(encrypted_key)?;
+
         Ok(Rc4::new(&rc4_key))
     }
 
     fn parse_music_info(&mut self) -> Result<NcmInfo, NcmDecodeError> {
         let info_length = self.parse_length()?;
         let ncm_info = self.get_json_info(info_length)?;
-        println!("ncm_info: {:#?}", ncm_info);
+
         Ok(ncm_info)    
+    }
+
+    fn parse_image_info(&mut self) -> Result<Vec<u8>, NcmDecodeError> {
+        let image_length = self.parse_length()?;
+        let image_bytes = self.take_next_bytes(image_length)?;
+
+        Ok(image_bytes)
     }
 }
 
@@ -108,9 +119,11 @@ impl NcmDecoder {
 
     fn get_json_info(&mut self, length: u64) -> Result<NcmInfo, NcmDecodeError> {
         let mut info_data = self.take_next_bytes(length)?;
+
         info_data.iter_mut().for_each(|byte| *byte = *byte ^ 0x63);
         let base64_decoded_info = base64_decode(info_data[22..].to_vec())?;
         let aes_decoded_info = aes128_decrypt(base64_decoded_info, &INFO_KEY)?;
+
         let json_string = String::from_utf8(aes_decoded_info[6..].to_vec())
             .map_err(|_| NcmDecodeError::StringConvertError)?;
         let ncm_info = NcmInfo::from(json_string);
