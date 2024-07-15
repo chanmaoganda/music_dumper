@@ -23,6 +23,8 @@ pub enum NcmDecodeError {
     StringConvertError,
     #[error("Failed to parse json")]
     JsonParseError,
+    #[error("Failed to parse ncm_id")]
+    InvalidId,
 }
 
 impl From<CryptError> for NcmDecodeError {

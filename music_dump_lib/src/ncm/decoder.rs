@@ -25,7 +25,7 @@ impl NcmDecoder {
     pub fn decode(&mut self) -> Result<(), NcmDecodeError> {
         self.parse_header()?;
         let rc4 = self.parse_rc4_handler()?;
-
+        let ncm_info = self.parse_music_info()?;
         Ok(())
     }
 
@@ -45,10 +45,11 @@ impl NcmDecoder {
         Ok(Rc4::new(&rc4_key))
     }
 
-    fn parse_music_info(&mut self) -> Result<(), NcmDecodeError> {
+    fn parse_music_info(&mut self) -> Result<NcmInfo, NcmDecodeError> {
         let info_length = self.parse_length()?;
-
-        Ok(())    
+        let ncm_info = self.get_json_info(info_length)?;
+        println!("ncm_info: {:#?}", ncm_info);
+        Ok(ncm_info)    
     }
 }
 
@@ -112,8 +113,7 @@ impl NcmDecoder {
         let aes_decoded_info = aes128_decrypt(base64_decoded_info, &INFO_KEY)?;
         let json_string = String::from_utf8(aes_decoded_info[6..].to_vec())
             .map_err(|_| NcmDecodeError::StringConvertError)?;
-        let ncm_info = serde_json::from_str::<NcmInfo>(&json_string)
-            .map_err(|_| NcmDecodeError::JsonParseError)?;
+        let ncm_info = NcmInfo::from(json_string);
         Ok(ncm_info)
     }
 
@@ -129,8 +129,7 @@ mod test {
         let mut ncm_decoder = NcmDecoder {
             reader: file
         };
-        ncm_decoder.parse_header()?;
-        ncm_decoder.parse_rc4_handler()?;
+        ncm_decoder.decode()?;
         Ok(())
     }
 }
