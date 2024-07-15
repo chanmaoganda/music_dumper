@@ -1,8 +1,11 @@
 use std::fs::File;
 use std::io::Read;
 
+use crate::{aes128_decrypt, base64_decode};
 use crate::error::NcmDecodeError;
 use crate::crypt::{self, Rc4};
+
+use super::model::NcmInfo;
 
 const HEADER_KEY: [u8; 16] = [ 0x68, 0x7A, 0x48, 0x52, 0x41, 0x6D, 0x73, 0x6F, 0x35, 0x6B, 0x49, 0x6E, 0x62, 0x61, 0x78, 0x57 ];
 
@@ -38,27 +41,50 @@ impl NcmDecoder {
 
     fn parse_rc4_handler(&mut self) -> Result<Rc4, NcmDecodeError> {
         let encrypted_key = self.get_encrypted_rc4_key()?;
-        let key = self.decrypt_rc4_key(encrypted_key)?;
-        Ok(Rc4::new(&key))
+        let rc4_key = self.decrypt_rc4_key(encrypted_key)?;
+        Ok(Rc4::new(&rc4_key))
+    }
+
+    fn parse_music_info(&mut self) -> Result<(), NcmDecodeError> {
+        let info_length = self.parse_length()?;
+
+        Ok(())    
     }
 }
 
 /// private utils to decode
 impl NcmDecoder {
+    fn parse_length(&mut self) -> Result<u64, NcmDecodeError> {
+        let mut byte_length = [0; 4];
 
-    fn get_encrypted_rc4_key(&mut self) -> Result<Vec<u8>, NcmDecodeError> {
-        let mut key_length = [0; 4];
-        let key_bytes = self.reader.read(&mut key_length).map_err(|_| NcmDecodeError::InvalidKey)?;
-        if key_bytes != 4 {
-            return Err(NcmDecodeError::InvalidKey);
+        let bytes_size = self.reader.read(&mut byte_length)
+            .map_err(|_| NcmDecodeError::ReadSizeError)?;
+        if bytes_size != 4 {
+            return Err(NcmDecodeError::ReadSizeError);
         }
         
-        let key_length = u32::from_ne_bytes(key_length) as u64;
+        let length = u32::from_ne_bytes(byte_length) as u64;
+        Ok(length)
+    }
 
+    fn take_next_bytes(&mut self, length: u64) -> Result<Vec<u8>, NcmDecodeError> {
+        let mut buffer = Vec::with_capacity(length as usize);
         let reader_ref = self.reader.by_ref();
-        let mut chunk = reader_ref.take(key_length);
-        let mut key = Vec::new();
-        chunk.read_to_end(&mut key).map_err(|_| NcmDecodeError::InvalidKey)?;
+        
+        let bytes_size = reader_ref.take(length)
+            .read_to_end(&mut buffer)
+            .map_err(|_| NcmDecodeError::ReadSizeError)?;
+
+        if bytes_size != length as usize {
+            return Err(NcmDecodeError::ReadSizeError);
+        }
+        Ok(buffer)
+    }
+
+    fn get_encrypted_rc4_key(&mut self) -> Result<Vec<u8>, NcmDecodeError> {
+        let key_length = self.parse_length()?;
+        let key = self.take_next_bytes(key_length)?;
+
         Ok(key)
     }
 
@@ -78,6 +104,19 @@ impl NcmDecoder {
 
         Ok(aes_decrypted_key[17..].to_vec())
     }
+
+    fn get_json_info(&mut self, length: u64) -> Result<NcmInfo, NcmDecodeError> {
+        let mut info_data = self.take_next_bytes(length)?;
+        info_data.iter_mut().for_each(|byte| *byte = *byte ^ 0x63);
+        let base64_decoded_info = base64_decode(info_data[22..].to_vec())?;
+        let aes_decoded_info = aes128_decrypt(base64_decoded_info, &INFO_KEY)?;
+        let json_string = String::from_utf8(aes_decoded_info[6..].to_vec())
+            .map_err(|_| NcmDecodeError::StringConvertError)?;
+        let ncm_info = serde_json::from_str::<NcmInfo>(&json_string)
+            .map_err(|_| NcmDecodeError::JsonParseError)?;
+        Ok(ncm_info)
+    }
+
 }
 
 #[cfg(test)]
