@@ -1,4 +1,4 @@
-use std::io::{Cursor, Read};
+use std::io::Cursor;
 
 use crate::NcmRc4;
 
@@ -16,7 +16,7 @@ impl Audio {
         }
     }
 
-    pub fn get_decrypted_audio(mut self) -> Vec<u8> {
+    pub fn get_decrypted_audio(self) -> Vec<u8> {
         let mut audio = self.reader.into_inner();
         self.ncm_rc4.decrypt(&mut audio);
         audio

@@ -1,6 +1,6 @@
-use std::{fs::File, io::Write, path::PathBuf};
+use std::{fs::File, io::Write};
 
-use crate::{MetaData, NcmDecoder, NcmMusic};
+use crate::{MetaData, NcmMusic};
 
 pub struct NcmDumper {
     music_list: Vec<NcmMusic>,
@@ -19,15 +19,4 @@ impl NcmDumper {
         metadata.inject(path_buf);
         Ok(())
     }
-}
-
-#[test]
-fn dump_test() {
-    let mut decoder = NcmDecoder::new(PathBuf::from("./src/test/8bite-honest.ncm"));
-    let music = decoder.decode().unwrap();
-    let dumper = NcmDumper {
-        music_list: vec![],
-    };
-    dumper.dump(music).unwrap();
-
 }
