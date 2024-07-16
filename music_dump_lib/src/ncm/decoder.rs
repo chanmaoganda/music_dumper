@@ -127,10 +127,9 @@ impl NcmDecoder {
 
         let aes_decrypted_key = crypt::aes128_decrypt(encrypted_key, &HEADER_KEY)?;
 
-        let salt = aes_decrypted_key[..17]
-            .iter()
-            .map(|byte| *byte as char)
-            .collect::<String>();
+        let salt = String::from_utf8(aes_decrypted_key[..17].to_vec())
+            .map_err(|_| NcmDecodeError::StringConvertError)?;
+            
         if salt != String::from("neteasecloudmusic") {
             return Err(NcmDecodeError::SaltError)
         }
