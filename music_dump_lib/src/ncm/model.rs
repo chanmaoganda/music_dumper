@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use serde::{Deserialize, Serialize};
 
 use crate::NcmDecodeError;
@@ -53,6 +55,18 @@ pub struct NcmInfo {
     pub alias: Option<Vec<String>>,
 }
 
+impl NcmInfo {
+    pub fn get_path_buf(&self) -> PathBuf {
+        let artists = self.artist.iter()
+            .map(|(name, _)| format!("{} - ", name) )
+            .collect::<String>();
+        let full_name = format!("{}{}", artists, self.name);
+        let mut path = PathBuf::from(full_name);
+        path.set_extension(&self.format);
+        path
+    }
+}
+
 impl From<RawNcmInfo> for NcmInfo {
     fn from(raw_info: RawNcmInfo) -> Self {
         Self {
@@ -81,5 +95,27 @@ impl From<String> for NcmInfo {
     fn from(json_string: String) -> Self {
         let raw_info = serde_json::from_str::<RawNcmInfo>(&json_string).unwrap();
         NcmInfo::from(raw_info)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn path_test() {
+        let info = NcmInfo {
+            name: "honest.".to_owned(),
+            id: 2099869167,
+            album: "honest.".to_owned(),
+            artist: vec![("8bite".to_owned(), 12606242)],
+            bitrate: 320000,
+            duration: 220331,
+            format: "mp3".to_owned(),
+            mv_id: None,
+            alias: None,
+        };
+        let path_buf = info.get_path_buf();
+        assert_eq!(path_buf, PathBuf::from("8bite - honest.mp3"));
     }
 }
