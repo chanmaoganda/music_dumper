@@ -1,14 +1,29 @@
-use std::{fs::File, io::Write};
+use std::{fs::File, io::Write, path::PathBuf};
 
-use crate::{MetaData, NcmMusic};
+use crate::{MetaData, NcmDecoder, NcmMusic};
+
+use rayon::prelude::*;
 
 pub struct NcmDumper {
-    music_list: Vec<NcmMusic>,
+    music_list: Vec<PathBuf>,
 }
 
 impl NcmDumper {
-    pub fn dump(&self, music: NcmMusic) -> Result<(), Box::<dyn std::error::Error>> {
-        let NcmMusic { metadata, path_buf, audio_data } = music;
+    pub fn dump_all(self) -> anyhow::Result<()> {
+        self.music_list.into_par_iter()
+            .for_each(|path_buf| {
+                Self::dump(path_buf).unwrap();
+            });
+        Ok(())
+    }
+
+    fn dump(path_buf: PathBuf) -> anyhow::Result<()> {
+        let mut decoder = NcmDecoder::new(path_buf);
+        let NcmMusic { 
+            metadata, 
+            path_buf, 
+            audio_data } 
+                = decoder.decode()?;
         let path = path_buf.as_path();
         let mut file = File::options()
             .write(true)

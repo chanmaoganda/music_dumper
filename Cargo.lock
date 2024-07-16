@@ -679,6 +679,7 @@ dependencies = [
  "cipher",
  "id3",
  "image",
+ "rayon",
  "serde",
  "serde_json",
  "thiserror",

@@ -9,9 +9,9 @@ members = [
     "./command_binary"
 ]
 
-[[bin]]
-name = "music_dumper_cmd"
-path = "./command_binary/src/main.rs"
+# [[bin]]
+# name = "music_dumper_cmd"
+# path = "./src/command_binary/src/main.rs"
 
 # [[bin]]
 # name = "music_dumper_gui"
@@ -29,5 +29,4 @@ serde = { version = "1.0.204", features = ["derive"] }
 serde_json = { version = "1.0.120" }
 image = "0.25.1"
 id3 = { version = "1.14.0" }
-clap = { version = "4.5.9", features = ["derive"] }
-glob = "0.3.1"
+rayon = "1.10.0"
