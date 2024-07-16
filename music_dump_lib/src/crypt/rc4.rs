@@ -14,10 +14,9 @@ impl NcmRc4 {
         }
     }
 
-    pub fn decrypt(&self, buf: Vec<u8>) -> Vec<u8> {
-        buf.into_iter().zip(self.rc4_iter.clone())
-            .map(|(byte, x)| byte ^ x)
-            .collect()
+    pub fn decrypt(&self, buf: &mut [u8]) {
+        buf.iter_mut().zip(self.rc4_iter.clone())
+            .for_each(|(byte, x)| *byte = *byte ^ x)
     }
 
     fn ksa(key: &[u8]) -> [u8; 256] {

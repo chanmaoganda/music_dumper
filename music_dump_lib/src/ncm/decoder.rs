@@ -149,12 +149,12 @@ mod test {
 
     #[test]
     fn encrypt_test() -> Result<(), Box<dyn std::error::Error>> {
-        let file = std::fs::File::open("../target/test/test.ncm")?;
+        let file = std::fs::File::open("./src/test/test.ncm")?;
         let mut ncm_decoder = NcmDecoder::new(file);
         let rc4 = ncm_decoder.decode()?;
-        let data = [63, 246, 41, 107];
-        let output = rc4.decrypt(data.to_vec());
-        assert_eq!(output, [102, 76, 97, 67]);
+        let mut data = [63, 246, 41, 107];
+        rc4.decrypt(&mut data);
+        assert_eq!(data, [102, 76, 97, 67]);
         Ok(())
     }
 
