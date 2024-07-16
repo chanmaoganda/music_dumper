@@ -16,9 +16,9 @@ impl Audio {
         }
     }
 
-    pub fn get_decrypted_audio(&mut self) -> Vec<u8> {
+    pub fn get_decrypted_audio(mut self) -> Vec<u8> {
         let mut audio = Vec::new();
-        self.reader.read_to_end(&mut audio);
+        self.reader.read_to_end(&mut audio).unwrap();
         audio
     }
 }
