@@ -1,29 +1,37 @@
-use std::io::{self, Read, Seek};
+use id3::{frame, TagLike};
+
+use crate::{guess_pict_type, NcmInfo};
+
+use super::metadata_trait::MetaData;
 
 pub struct NcmMetaData {
     tag: id3::Tag,
 }
 
 impl NcmMetaData {
-    pub fn new<T>(reader: T) -> Result<Self, id3::Error>
-        where T: Read + Seek {
-        let tag = id3::Tag::read_from2(reader)?;
-        Ok(Self {tag,})
+    pub fn new(ncm_info: NcmInfo, image: Vec<u8>) -> Self {
+        let mut tag = id3::Tag::new();
+        let artist_string = ncm_info.artist
+            .into_iter()
+            .map(|(name, _)| name)
+            .collect::<Vec<String>>()
+            .join("/");
+        tag.set_artist(artist_string);
+        tag.set_album(ncm_info.album);
+        
+        // TODO: add From<ImageFormat> for PictureType? a feature request for id3 crate?
+        tag.add_frame(id3::frame::Picture {
+            mime_type: guess_pict_type(&image),
+            picture_type: frame::PictureType::CoverFront,
+            description: "".to_owned(),
+            data: image,
+        });
+        Self { tag }
     }
 }
 
-#[test]
-pub fn test() -> io::Result<()>{
-    let a = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    let mut cursor = io::Cursor::new(a);
-    cursor.seek(io::SeekFrom::Current(2))?;
-    let mut buf = [0; 2];
-    cursor.read(&mut buf)?;
-    println!("{:?}", buf);
-    cursor.seek(io::SeekFrom::Current(2))?;
-
-    cursor.read(&mut buf)?;
-    println!("{:?}", buf);
-    println!("{}", cursor.position());
-    Ok(())
+impl MetaData for NcmMetaData {
+    fn inject(&self) {
+        
+    }
 }
