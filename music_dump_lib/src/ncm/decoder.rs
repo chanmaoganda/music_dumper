@@ -1,9 +1,9 @@
 use std::fs::File;
 use std::io::{Read, Seek};
 
-use crate::{aes128_decrypt, base64_decode};
+use crate::{aes128_decrypt, base64_decode, NcmRc4};
 use crate::error::NcmDecodeError;
-use crate::crypt::{self, Rc4};
+use crate::crypt;
 
 use super::model::NcmInfo;
 
@@ -22,13 +22,13 @@ impl NcmDecoder {
         }
     }
 
-    pub fn decode(&mut self) -> Result<(), NcmDecodeError> {
+    pub fn decode(&mut self) -> Result<NcmRc4, NcmDecodeError> {
         self.parse_header()?;
-        let rc4 = self.parse_rc4_handler()?;
+        let ncm_rc4 = self.parse_rc4_handler()?;
         let ncm_info = self.parse_music_info()?;
         let _ = self.take_next_bytes(9)?;
-        let image_info = self.parse_image_info()?;
-        Ok(())
+        let image = self.parse_image()?;
+        Ok(ncm_rc4)
     }
 
     fn parse_header(&mut self) -> Result<(), NcmDecodeError> {
@@ -42,11 +42,11 @@ impl NcmDecoder {
         Ok(())
     }
 
-    fn parse_rc4_handler(&mut self) -> Result<Rc4, NcmDecodeError> {
+    fn parse_rc4_handler(&mut self) -> Result<NcmRc4, NcmDecodeError> {
         let encrypted_key = self.get_encrypted_rc4_key()?;
         let rc4_key = self.decrypt_rc4_key(encrypted_key)?;
 
-        Ok(Rc4::new(&rc4_key))
+        Ok(NcmRc4::new(&rc4_key))
     }
 
     fn parse_music_info(&mut self) -> Result<NcmInfo, NcmDecodeError> {
@@ -56,7 +56,7 @@ impl NcmDecoder {
         Ok(ncm_info)    
     }
 
-    fn parse_image_info(&mut self) -> Result<Vec<u8>, NcmDecodeError> {
+    fn parse_image(&mut self) -> Result<Vec<u8>, NcmDecodeError> {
         let image_length = self.parse_length()?;
         let image_bytes = self.take_next_bytes(image_length)?;
 
@@ -134,6 +134,7 @@ impl NcmDecoder {
 
 #[cfg(test)]
 mod test {
+
     use super::*;
 
     #[test]
@@ -145,4 +146,16 @@ mod test {
         ncm_decoder.decode()?;
         Ok(())
     }
+
+    #[test]
+    fn encrypt_test() -> Result<(), Box<dyn std::error::Error>> {
+        let file = std::fs::File::open("../target/test/test.ncm")?;
+        let mut ncm_decoder = NcmDecoder::new(file);
+        let rc4 = ncm_decoder.decode()?;
+        let data = [63, 246, 41, 107];
+        let output = rc4.decrypt(data.to_vec());
+        assert_eq!(output, [102, 76, 97, 67]);
+        Ok(())
+    }
+
 }

@@ -1,61 +1,50 @@
-/// https://highassurance.rs/chp2/dynamic_assurance_2.html#:~:text=The%20Key%2DScheduling%20Algorithm%20(KSA,logic%20in%20Rc4%20's%20constructor.
-/// this piece of code is from the upper site
-pub struct Rc4 {
-    s: [u8; 256],
-    i: u8,
-    j: u8,
+type Rc4Iter = std::iter::Cycle<std::array::IntoIter<u8, 256_usize>>;
+
+pub struct NcmRc4 {
+    rc4_iter: Rc4Iter,
 }
 
-impl Rc4 {
-    /// Init a new Rc4 stream cipher instance
+impl NcmRc4 {
     pub fn new(key: &[u8]) -> Self {
-        // Verify valid key length (40 to 2048 bits)
-        assert!(5 <= key.len() && key.len() <= 256);
-
-        // Zero-init our struct
-        let mut rc4 = Rc4 {
-            s: [0; 256],
-            i: 0,
-            j: 0,
-        };
-
-        // Cipher state identity permutation
-        for (i, b) in rc4.s.iter_mut().enumerate() {
-            // s[i] = i
-            *b = i as u8;
+        let mut state = [0u8; 256];
+        Self::ncm_prga(&mut state, &Self::ksa(key));
+        let rc4_iter: Rc4Iter = state.into_iter().cycle();
+        Self {
+            rc4_iter,
         }
-
-        // Process for 256 iterations, get starting cipher state permutation
-        let mut j: u8 = 0;
-        for i in 0..256 {
-            // j = (j + s[i] + key[i % key_len]) % 256
-            j = j.wrapping_add(rc4.s[i]).wrapping_add(key[i % key.len()]);
-
-            // Swap values of s[i] and s[j]
-            rc4.s.swap(i, j as usize);
-        }
-
-        // Return our initialized Rc4
-        rc4
     }
 
-    fn prga_next(&mut self) -> u8 {
-        // i = (i + 1) mod 256
-        self.i = self.i.wrapping_add(1);
-
-        // j = (j + s[i]) mod 256
-        self.j = self.j.wrapping_add(self.s[self.i as usize]);
-
-        // Swap values of s[i] and s[j]
-        self.s.swap(self.i as usize, self.j as usize);
-
-        // k = s[(s[i] + s[j]) mod 256]
-        self.s[(self.s[self.i as usize].wrapping_add(self.s[self.j as usize])) as usize]
+    pub fn decrypt(&self, buf: Vec<u8>) -> Vec<u8> {
+        buf.into_iter().zip(self.rc4_iter.clone())
+            .map(|(byte, x)| byte ^ x)
+            .collect()
     }
 
-    pub fn apply_keystream(&mut self, data: &mut [u8]) {
-        for b_ptr in data {
-            *b_ptr ^= self.prga_next();
-        }
+    fn ksa(key: &[u8]) -> [u8; 256] {
+        let mut state = [0; 256];
+
+        state.iter_mut().enumerate()
+            .for_each(|(index, byte)| {
+                *byte = index as u8;
+            });
+
+        let key_iter = key.iter().cycle();
+        let mut j = 0u8;
+
+        (0..=255).zip(key_iter).for_each(|(i, k)| {
+            j = j.wrapping_add(state[i]).wrapping_add(*k);
+            state.swap(i, j.into());
+        });
+
+        state
+    }
+
+    fn ncm_prga(state: &mut [u8; 256], ksa_key: &[u8; 256]) {
+        (0..=255u8).for_each(|i| {
+            let key1 = i.wrapping_add(1);
+            let key2 = key1.wrapping_add(ksa_key[key1 as usize]);
+            let index = ksa_key[key1 as usize].wrapping_add(ksa_key[key2 as usize]);
+            state[i as usize] = ksa_key[index as usize];
+        });
     }
 }
