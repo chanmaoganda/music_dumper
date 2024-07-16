@@ -56,7 +56,7 @@ pub struct NcmInfo {
 }
 
 impl NcmInfo {
-    pub fn get_path_buf(&self) -> PathBuf {
+    pub fn get_name(&self) -> PathBuf {
         let artists = self.artist.iter()
             .map(|(name, _)| format!("{} - ", name) )
             .collect::<String>();
@@ -115,7 +115,7 @@ mod tests {
             mv_id: None,
             alias: None,
         };
-        let path_buf = info.get_path_buf();
+        let path_buf = info.get_name();
         assert_eq!(path_buf, PathBuf::from("8bite - honest.mp3"));
     }
 }

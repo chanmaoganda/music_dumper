@@ -3,9 +3,9 @@ use std::path::PathBuf;
 use crate::NcmMetaData;
 
 pub struct NcmMusic {
-    metadata: NcmMetaData,
-    path_buf: PathBuf,
-    audio_data: Vec<u8>,
+    pub metadata: NcmMetaData,
+    pub path_buf: PathBuf,
+    pub audio_data: Vec<u8>,
 }
 
 impl NcmMusic {

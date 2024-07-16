@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{Read, Seek};
+use std::path::PathBuf;
 
 use crate::{aes128_decrypt, base64_decode, NcmMetaData, NcmMusic, NcmRc4};
 use crate::error::NcmDecodeError;
@@ -14,12 +15,15 @@ const INFO_KEY: [u8; 16] = [ 0x23, 0x31, 0x34, 0x6C, 0x6A, 0x6B, 0x5F, 0x21, 0x5
 
 pub struct NcmDecoder {
     reader: File,
+    parent_buf: PathBuf,
 }
 
 impl NcmDecoder {
-    pub fn new(reader: File) -> Self {
+    pub fn new(path: PathBuf) -> Self {
+        let reader = File::open(&path).unwrap();
         NcmDecoder {
             reader,
+            parent_buf: PathBuf::from(path.parent().unwrap())
         }
     }
 
@@ -27,7 +31,8 @@ impl NcmDecoder {
         self.parse_header()?;
         let ncm_rc4 = self.parse_rc4_handler()?;
         let ncm_info = self.parse_music_info()?;
-        let path_buf = ncm_info.get_path_buf();
+        let name = ncm_info.get_name();
+        let path_buf = self.parent_buf.join(name);
         let _ = self.take_next_bytes(9)?;
         let image = self.parse_image()?;
         let audio = self.parse_audio(ncm_rc4)?;
@@ -145,33 +150,5 @@ impl NcmDecoder {
         let ncm_info = NcmInfo::from(json_string);
         Ok(ncm_info)
     }
-
-}
-
-#[cfg(test)]
-mod test {
-
-    use super::*;
-
-    #[test]
-    fn cover_test() -> Result<(), Box<dyn std::error::Error>> {
-        let file = std::fs::File::open("../target/test/8bite-honest.ncm")?;
-        let mut ncm_decoder = NcmDecoder {
-            reader: file
-        };
-        ncm_decoder.decode()?;
-        Ok(())
-    }
-
-    // #[test]
-    // fn encrypt_test() -> Result<(), Box<dyn std::error::Error>> {
-    //     let file = std::fs::File::open("./src/test/test.ncm")?;
-    //     let mut ncm_decoder = NcmDecoder::new(file);
-    //     let rc4 = ncm_decoder.decode()?;
-    //     let mut data = [63, 246, 41, 107];
-    //     rc4.decrypt(&mut data);
-    //     assert_eq!(data, [102, 76, 97, 67]);
-    //     Ok(())
-    // }
 
 }
