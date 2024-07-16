@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::{Read, Seek};
 
-use crate::{aes128_decrypt, base64_decode, NcmRc4};
+use crate::{aes128_decrypt, base64_decode, NcmMetaData, NcmMusic, NcmRc4};
 use crate::error::NcmDecodeError;
 use crate::crypt;
 
@@ -23,14 +23,17 @@ impl NcmDecoder {
         }
     }
 
-    pub fn decode(&mut self) -> Result<(), NcmDecodeError> {
+    pub fn decode(&mut self) -> Result<NcmMusic, NcmDecodeError> {
         self.parse_header()?;
         let ncm_rc4 = self.parse_rc4_handler()?;
         let ncm_info = self.parse_music_info()?;
+        let path_buf = ncm_info.get_path_buf();
         let _ = self.take_next_bytes(9)?;
         let image = self.parse_image()?;
         let audio = self.parse_audio(ncm_rc4)?;
-        Ok(())
+
+        let metadata = NcmMetaData::new(ncm_info, image);
+        Ok(NcmMusic::new(metadata, path_buf, audio))
     }
 
     fn parse_header(&mut self) -> Result<(), NcmDecodeError> {
@@ -67,8 +70,9 @@ impl NcmDecoder {
 
     fn parse_audio(&mut self, ncm_rc4: NcmRc4) -> Result<Vec<u8>, NcmDecodeError> {
         let mut encrypted_audio = Vec::new();
-        self.reader.read_to_end(&mut encrypted_audio);
-        let mut audio = Audio::new(ncm_rc4, encrypted_audio);
+        self.reader.read_to_end(&mut encrypted_audio)
+            .map_err(|_| NcmDecodeError::ReadSizeError)?;
+        let audio = Audio::new(ncm_rc4, encrypted_audio);
 
         Ok(audio.get_decrypted_audio())
     }

@@ -1,17 +1,19 @@
-use std::fs;
+use std::path::PathBuf;
+
+use crate::NcmMetaData;
 
 pub struct NcmMusic {
-    
+    metadata: NcmMetaData,
+    path_buf: PathBuf,
+    audio_data: Vec<u8>,
 }
 
 impl NcmMusic {
-    
-}
-
-impl From<fs::File> for NcmMusic {
-    fn from(mut file: fs::File) -> Self {
-
-
-        NcmMusic {}
+    pub fn new(metadata: NcmMetaData, path_buf: PathBuf, audio_data: Vec<u8>) -> Self {
+        Self {
+            metadata,
+            path_buf,
+            audio_data,
+        }
     }
 }
