@@ -13,4 +13,3 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 id3 = { workspace = true }
 image = { workspace = true, default-features = false }
-clap = { version = "4.5.9", features = ["derive"] }

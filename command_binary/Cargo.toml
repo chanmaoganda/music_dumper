@@ -1,0 +1,9 @@
+[package]
+name = "command_binary"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { workspace = true }
+music_dump_lib = { workspace = true }
+glob = { workspace = true }
