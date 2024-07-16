@@ -6,7 +6,8 @@ edition = "2021"
 [workspace]
 members = [
     "./music_dump_lib",
-    "./command_binary"
+    "./command_binary",
+    "./gui_binary"
 ]
 
 # [[bin]]
@@ -30,3 +31,5 @@ serde_json = { version = "1.0.120" }
 image = "0.25.1"
 id3 = { version = "1.14.0" }
 rayon = "1.10.0"
+glob = "0.3.1"
+clap = { version = "4.5.0", features = ["derive"] }

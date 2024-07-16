@@ -9,6 +9,10 @@ pub struct NcmDumper {
 }
 
 impl NcmDumper {
+    pub fn new(music_list: Vec<PathBuf>) -> Self {
+        Self { music_list }
+    }
+
     pub fn dump_all(self) -> anyhow::Result<()> {
         self.music_list.into_par_iter()
             .for_each(|path_buf| {

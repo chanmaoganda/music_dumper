@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-clap = { version = "4.5.0", features = ["derive"] }
+clap = { workspace = true }
+glob = { workspace = true }
 music_dump_lib = { workspace = true }
-glob = "0.3.1"
+anyhow = { workspace = true }
