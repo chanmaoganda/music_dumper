@@ -5,6 +5,7 @@ use crate::{aes128_decrypt, base64_decode, NcmRc4};
 use crate::error::NcmDecodeError;
 use crate::crypt;
 
+use super::audio::Audio;
 use super::model::NcmInfo;
 
 const HEADER_KEY: [u8; 16] = [ 0x68, 0x7A, 0x48, 0x52, 0x41, 0x6D, 0x73, 0x6F, 0x35, 0x6B, 0x49, 0x6E, 0x62, 0x61, 0x78, 0x57 ];
@@ -22,13 +23,14 @@ impl NcmDecoder {
         }
     }
 
-    pub fn decode(&mut self) -> Result<NcmRc4, NcmDecodeError> {
+    pub fn decode(&mut self) -> Result<(), NcmDecodeError> {
         self.parse_header()?;
         let ncm_rc4 = self.parse_rc4_handler()?;
         let ncm_info = self.parse_music_info()?;
         let _ = self.take_next_bytes(9)?;
         let image = self.parse_image()?;
-        Ok(ncm_rc4)
+        let audio = self.parse_audio(ncm_rc4)?;
+        Ok(())
     }
 
     fn parse_header(&mut self) -> Result<(), NcmDecodeError> {
@@ -62,6 +64,16 @@ impl NcmDecoder {
 
         Ok(image_bytes)
     }
+
+    fn parse_audio(&mut self, ncm_rc4: NcmRc4) -> Result<Vec<u8>, NcmDecodeError> {
+        let mut encrypted_audio = Vec::new();
+        self.reader.read_to_end(&mut encrypted_audio);
+        let mut audio = Audio::new(ncm_rc4, encrypted_audio);
+
+        Ok(audio.get_decrypted_audio())
+    }
+
+    
 }
 
 /// private utils to decode
