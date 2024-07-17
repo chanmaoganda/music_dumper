@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{Read, Seek};
 use std::path::PathBuf;
 
-use crate::{aes128_decrypt, base64_decode, Mp3MetaData, NcmMusic, NcmRc4};
+use crate::{meta_data, NcmMusic, NcmRc4};
 use crate::error::NcmDecodeError;
 use crate::crypt;
 
@@ -33,8 +33,8 @@ impl NcmDecoder {
         let _ = self.take_next_bytes(9)?;
         let image = self.parse_image()?;
         let audio = self.parse_audio(ncm_rc4)?;
+        let metadata = meta_data::metadata_builder(&music_type, ncm_info, image);
 
-        let metadata = Box::new(Mp3MetaData::new(ncm_info, image));
         Ok(NcmMusic::new(metadata, music_type, audio))
     }
 
@@ -138,8 +138,8 @@ impl NcmDecoder {
         let mut info_data = self.take_next_bytes(length)?;
 
         info_data.iter_mut().for_each(|byte| *byte = *byte ^ 0x63);
-        let base64_decoded_info = base64_decode(info_data[22..].to_vec())?;
-        let aes_decoded_info = aes128_decrypt(base64_decoded_info, &INFO_KEY)?;
+        let base64_decoded_info = crypt::base64_decode(info_data[22..].to_vec())?;
+        let aes_decoded_info = crypt::aes128_decrypt(base64_decoded_info, &INFO_KEY)?;
 
         let json_string = String::from_utf8(aes_decoded_info[6..].to_vec())
             .map_err(|_| NcmDecodeError::StringConvertError)?;
