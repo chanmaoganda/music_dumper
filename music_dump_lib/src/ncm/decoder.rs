@@ -13,17 +13,17 @@ const HEADER_KEY: [u8; 16] = [ 0x68, 0x7A, 0x48, 0x52, 0x41, 0x6D, 0x73, 0x6F, 0
 
 const INFO_KEY: [u8; 16] = [ 0x23, 0x31, 0x34, 0x6C, 0x6A, 0x6B, 0x5F, 0x21, 0x5C, 0x5D, 0x26, 0x30, 0x55, 0x3C, 0x27, 0x28 ];
 
-pub struct NcmDecoder {
+pub struct NcmDecoder<'a> {
     reader: File,
-    parent_buf: PathBuf,
+    output_directory: &'a PathBuf,
 }
 
-impl NcmDecoder {
-    pub fn new(path: PathBuf) -> Self {
+impl<'a> NcmDecoder<'a> {
+    pub fn new(path: PathBuf, output_directory: &'a PathBuf) -> Self {
         let reader = File::open(&path).unwrap();
         NcmDecoder {
             reader,
-            parent_buf: PathBuf::from(path.parent().unwrap())
+            output_directory,
         }
     }
 
@@ -32,7 +32,7 @@ impl NcmDecoder {
         let ncm_rc4 = self.parse_rc4_handler()?;
         let ncm_info = self.parse_music_info()?;
         let name = ncm_info.get_name();
-        let path_buf = self.parent_buf.join(name);
+        let path_buf = self.output_directory.join(name);
         let _ = self.take_next_bytes(9)?;
         let image = self.parse_image()?;
         let audio = self.parse_audio(ncm_rc4)?;
@@ -86,7 +86,7 @@ impl NcmDecoder {
 }
 
 /// private utils to decode
-impl NcmDecoder {
+impl<'a> NcmDecoder<'a> {
     fn parse_length(&mut self) -> Result<u64, NcmDecodeError> {
         let mut byte_length = [0; 4];
 
