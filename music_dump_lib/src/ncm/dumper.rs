@@ -25,7 +25,7 @@ impl NcmDumper {
     fn dump(path_buf: &PathBuf, output_directory: &PathBuf) -> anyhow::Result<()> {
         let mut decoder = NcmDecoder::new(path_buf);
         let NcmMusic { 
-            metadata,
+            mut metadata,
             music_type,
             audio_data 
         } = decoder.decode()?;

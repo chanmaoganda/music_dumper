@@ -20,7 +20,7 @@ impl Mp3MetaData {
             .join("/");
         tag.set_artist(artist_string);
         tag.set_album(ncm_info.album);
-        
+        tag.set_title(ncm_info.name);
         // TODO: add From<ImageFormat> for PictureType? a feature request for id3 crate?
         tag.add_frame(id3::frame::Picture {
             mime_type: guess_pict_type(&image),
@@ -33,7 +33,7 @@ impl Mp3MetaData {
 }
 
 impl MetaData for Mp3MetaData {
-    fn inject(&self, path_buf: &PathBuf) {
+    fn inject(&mut self, path_buf: &PathBuf) {
         self.tag.write_to_path(path_buf, id3::Version::Id3v23).unwrap();
     }
 }
