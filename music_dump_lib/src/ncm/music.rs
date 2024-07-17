@@ -1,7 +1,7 @@
-use crate::NcmMetaData;
+use crate::MetaData;
 
 pub struct NcmMusic {
-    pub metadata: NcmMetaData,
+    pub metadata: Box<dyn MetaData>,
     pub audio_data: Vec<u8>,
     pub music_type: String,
 }
@@ -9,7 +9,7 @@ pub struct NcmMusic {
 
 
 impl NcmMusic {
-    pub fn new(metadata: NcmMetaData, music_type: String, audio_data: Vec<u8>) -> Self {
+    pub fn new(metadata: Box<dyn MetaData>, music_type: String, audio_data: Vec<u8>) -> Self {
         Self {
             metadata,
             audio_data,

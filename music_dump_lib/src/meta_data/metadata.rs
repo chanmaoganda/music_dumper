@@ -1,5 +1,5 @@
-use std::path::Path;
+use std::path::PathBuf;
 
 pub trait MetaData {
-    fn inject(&self, path_buf: impl AsRef<Path>);
+    fn inject(&self, path_buf: &PathBuf);
 }
