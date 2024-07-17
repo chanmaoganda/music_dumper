@@ -4,7 +4,7 @@ use id3::{frame, TagLike};
 
 use crate::{guess_pict_type, NcmInfo};
 
-use super::metadata_trait::MetaData;
+use super::metadata::MetaData;
 
 pub struct NcmMetaData {
     tag: id3::Tag,
@@ -33,7 +33,7 @@ impl NcmMetaData {
 }
 
 impl MetaData for NcmMetaData {
-    fn inject(&self, path_buf: PathBuf) {
+    fn inject(&self, path_buf: &PathBuf) {
         self.tag.write_to_path(path_buf, id3::Version::Id3v23).unwrap();
     }
 }

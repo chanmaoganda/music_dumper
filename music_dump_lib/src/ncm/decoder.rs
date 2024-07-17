@@ -19,8 +19,8 @@ pub struct NcmDecoder<'a> {
 }
 
 impl<'a> NcmDecoder<'a> {
-    pub fn new(path: PathBuf, output_directory: &'a PathBuf) -> Self {
-        let reader = File::open(&path).unwrap();
+    pub fn new(path: &'a PathBuf, output_directory: &'a PathBuf) -> Self {
+        let reader = File::open(path).unwrap();
         NcmDecoder {
             reader,
             output_directory,
@@ -31,14 +31,13 @@ impl<'a> NcmDecoder<'a> {
         self.parse_header()?;
         let ncm_rc4 = self.parse_rc4_handler()?;
         let ncm_info = self.parse_music_info()?;
-        let name = ncm_info.get_name();
-        let path_buf = self.output_directory.join(name);
+        let music_type = ncm_info.format.clone();
         let _ = self.take_next_bytes(9)?;
         let image = self.parse_image()?;
         let audio = self.parse_audio(ncm_rc4)?;
 
         let metadata = NcmMetaData::new(ncm_info, image);
-        Ok(NcmMusic::new(metadata, path_buf, audio))
+        Ok(NcmMusic::new(metadata, music_type, audio))
     }
 
     fn parse_header(&mut self) -> Result<(), NcmDecodeError> {

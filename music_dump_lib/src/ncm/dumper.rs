@@ -17,19 +17,20 @@ impl NcmDumper {
     pub fn dump_all(self) -> anyhow::Result<()> {
         self.music_list.into_par_iter()
             .for_each(|path_buf| {
-                Self::dump(path_buf, &self.output_directory).unwrap();
+                Self::dump(&path_buf, &self.output_directory).unwrap();
             });
         Ok(())
     }
 
-    fn dump(path_buf: PathBuf, output_directory: &PathBuf) -> anyhow::Result<()> {
+    fn dump(path_buf: &PathBuf, output_directory: &PathBuf) -> anyhow::Result<()> {
         let mut decoder = NcmDecoder::new(path_buf, output_directory);
         let NcmMusic { 
-            metadata, 
-            path_buf, 
-            audio_data } 
-                = decoder.decode()?;
-        let path = path_buf.as_path();
+            metadata,
+            music_type,
+            audio_data 
+        } = decoder.decode()?;
+        let file_name = path_buf.file_name().unwrap();
+        let path = output_directory.join(file_name).with_extension(music_type);
         let mut file = File::options()
             .write(true)
             .create(true)
