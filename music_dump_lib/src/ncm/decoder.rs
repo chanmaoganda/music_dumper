@@ -13,17 +13,15 @@ const HEADER_KEY: [u8; 16] = [ 0x68, 0x7A, 0x48, 0x52, 0x41, 0x6D, 0x73, 0x6F, 0
 
 const INFO_KEY: [u8; 16] = [ 0x23, 0x31, 0x34, 0x6C, 0x6A, 0x6B, 0x5F, 0x21, 0x5C, 0x5D, 0x26, 0x30, 0x55, 0x3C, 0x27, 0x28 ];
 
-pub struct NcmDecoder<'a> {
+pub struct NcmDecoder {
     reader: File,
-    output_directory: &'a PathBuf,
 }
 
-impl<'a> NcmDecoder<'a> {
-    pub fn new(path: &'a PathBuf, output_directory: &'a PathBuf) -> Self {
+impl NcmDecoder {
+    pub fn new(path: &PathBuf) -> Self {
         let reader = File::open(path).unwrap();
         NcmDecoder {
             reader,
-            output_directory,
         }
     }
 
@@ -85,7 +83,7 @@ impl<'a> NcmDecoder<'a> {
 }
 
 /// private utils to decode
-impl<'a> NcmDecoder<'a> {
+impl NcmDecoder {
     fn parse_length(&mut self) -> Result<u64, NcmDecodeError> {
         let mut byte_length = [0; 4];
 
