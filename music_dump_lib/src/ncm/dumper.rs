@@ -35,9 +35,9 @@ impl NcmDumper {
             .write(true)
             .create(true)
             .truncate(true)
-            .open(path)?;
+            .open(&path)?;
         file.write_all(&audio_data)?;
-        metadata.inject(path_buf);
+        metadata.inject(&path);
         Ok(())
     }
 }

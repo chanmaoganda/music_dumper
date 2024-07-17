@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::Path;
 
 use id3::{frame, TagLike};
 
@@ -33,7 +33,7 @@ impl NcmMetaData {
 }
 
 impl MetaData for NcmMetaData {
-    fn inject(&self, path_buf: &PathBuf) {
+    fn inject(&self, path_buf: impl AsRef<Path>) {
         self.tag.write_to_path(path_buf, id3::Version::Id3v23).unwrap();
     }
 }
