@@ -1,6 +1,6 @@
 use std::{fs::File, io::Write, path::PathBuf};
 
-use crate::{MetaData, NcmDecoder, NcmMusic};
+use crate::{NcmDecoder, NcmMusic};
 
 use rayon::prelude::*;
 

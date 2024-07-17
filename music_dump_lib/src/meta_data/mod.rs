@@ -1,9 +1,9 @@
 mod metadata;
-mod ncm_metadata;
-mod qmc_metadata;
+mod mp3_metadata;
+mod flac_metadata;
 
 use image::{guess_format, ImageFormat};
-pub use ncm_metadata::*;
+pub use mp3_metadata::*;
 pub use metadata::MetaData;
 
 pub fn guess_pict_type(data: &Vec<u8>) -> String {

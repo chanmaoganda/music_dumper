@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::PathBuf;
 
 use id3::{frame, TagLike};
 
@@ -6,11 +6,11 @@ use crate::{guess_pict_type, NcmInfo};
 
 use super::metadata::MetaData;
 
-pub struct NcmMetaData {
+pub struct Mp3MetaData {
     tag: id3::Tag,
 }
 
-impl NcmMetaData {
+impl Mp3MetaData {
     pub fn new(ncm_info: NcmInfo, image: Vec<u8>) -> Self {
         let mut tag = id3::Tag::new();
         let artist_string = ncm_info.artist
@@ -32,8 +32,8 @@ impl NcmMetaData {
     }
 }
 
-impl MetaData for NcmMetaData {
-    fn inject(&self, path_buf: impl AsRef<Path>) {
+impl MetaData for Mp3MetaData {
+    fn inject(&self, path_buf: &PathBuf) {
         self.tag.write_to_path(path_buf, id3::Version::Id3v23).unwrap();
     }
 }

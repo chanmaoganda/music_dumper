@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{Read, Seek};
 use std::path::PathBuf;
 
-use crate::{aes128_decrypt, base64_decode, NcmMetaData, NcmMusic, NcmRc4};
+use crate::{aes128_decrypt, base64_decode, Mp3MetaData, NcmMusic, NcmRc4};
 use crate::error::NcmDecodeError;
 use crate::crypt;
 
@@ -34,7 +34,7 @@ impl NcmDecoder {
         let image = self.parse_image()?;
         let audio = self.parse_audio(ncm_rc4)?;
 
-        let metadata = NcmMetaData::new(ncm_info, image);
+        let metadata = Box::new(Mp3MetaData::new(ncm_info, image));
         Ok(NcmMusic::new(metadata, music_type, audio))
     }
 
