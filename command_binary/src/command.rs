@@ -1,6 +1,6 @@
+use std::{fs::create_dir, path::PathBuf};
 
-use std::path::PathBuf;
-
+use anyhow::Error;
 use clap::Parser;
 use glob::glob;
 
@@ -29,4 +29,29 @@ impl Command {
         }
         Ok(items)
     }
+
+    pub fn get_output_path(&self) -> anyhow::Result<PathBuf> {
+        if let Some(path) = &self.output_path {
+            return Ok(PathBuf::from(path));
+        }
+        let default_paths = vec![
+            PathBuf::from("output"),
+            PathBuf::from("out"),
+            PathBuf::from("dump"),
+        ];
+        for path in default_paths {
+            if dir_check_and_create(&path) {
+                return Ok(path);
+            }
+        }
+        Err(Error::msg("No output path provided and default paths are occupied"))
+    }
+}
+
+fn dir_check_and_create(path: &PathBuf) -> bool {
+    if !path.exists() {
+        create_dir(path).unwrap();
+        return true;
+    }
+    path.is_dir()
 }
