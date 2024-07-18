@@ -2,17 +2,28 @@ use std::fs::File;
 use std::io::{Read, Seek};
 use std::path::PathBuf;
 
-use crate::{meta_data, NcmMusic, NcmRc4};
-use crate::error::NcmDecodeError;
-use crate::crypt;
+use crate::{crypt, meta_data};
+use crate::NcmDecodeError;
 
+use crypt::NcmRc4;
 use super::audio::Audio;
 use super::model::NcmInfo;
+use super::NcmMusic;
 
 const HEADER_KEY: [u8; 16] = [ 0x68, 0x7A, 0x48, 0x52, 0x41, 0x6D, 0x73, 0x6F, 0x35, 0x6B, 0x49, 0x6E, 0x62, 0x61, 0x78, 0x57 ];
 
 const INFO_KEY: [u8; 16] = [ 0x23, 0x31, 0x34, 0x6C, 0x6A, 0x6B, 0x5F, 0x21, 0x5C, 0x5D, 0x26, 0x30, 0x55, 0x3C, 0x27, 0x28 ];
 
+/// Handle the decoding process of a NCM file
+/// 
+/// # Example
+/// ``` rust
+/// use std::path::PathBuf;
+/// 
+/// let file_path = PathBuf::from("path/to/file.ncm");
+/// let mut decoder = NcmDecoder::new(&file_path);
+/// let music: NcmMusic = decoder.decode()?;
+/// ```
 pub struct NcmDecoder {
     reader: File,
 }
@@ -38,7 +49,7 @@ impl NcmDecoder {
         Ok(NcmMusic::new(metadata, music_type, audio))
     }
 
-    fn parse_header(&mut self) -> Result<(), NcmDecodeError> {
+    pub fn parse_header(&mut self) -> Result<(), NcmDecodeError> {
         let mut header_buffer = [0; 10];
         let header_size = self.reader.read(& mut header_buffer)
             .map_err(|_| NcmDecodeError::InvalidHeader).unwrap();
@@ -49,28 +60,28 @@ impl NcmDecoder {
         Ok(())
     }
 
-    fn parse_rc4_handler(&mut self) -> Result<NcmRc4, NcmDecodeError> {
+    pub fn parse_rc4_handler(&mut self) -> Result<NcmRc4, NcmDecodeError> {
         let encrypted_key = self.get_encrypted_rc4_key()?;
         let rc4_key = self.decrypt_rc4_key(encrypted_key)?;
 
         Ok(NcmRc4::new(&rc4_key))
     }
 
-    fn parse_music_info(&mut self) -> Result<NcmInfo, NcmDecodeError> {
+    pub fn parse_music_info(&mut self) -> Result<NcmInfo, NcmDecodeError> {
         let info_length = self.parse_length()?;
         let ncm_info = self.get_json_info(info_length)?;
 
         Ok(ncm_info)    
     }
 
-    fn parse_image(&mut self) -> Result<Vec<u8>, NcmDecodeError> {
+    pub fn parse_image(&mut self) -> Result<Vec<u8>, NcmDecodeError> {
         let image_length = self.parse_length()?;
         let image_bytes = self.take_next_bytes(image_length)?;
 
         Ok(image_bytes)
     }
 
-    fn parse_audio(&mut self, ncm_rc4: NcmRc4) -> Result<Vec<u8>, NcmDecodeError> {
+    pub fn parse_audio(&mut self, ncm_rc4: NcmRc4) -> Result<Vec<u8>, NcmDecodeError> {
         let mut encrypted_audio = Vec::new();
         self.reader.read_to_end(&mut encrypted_audio)
             .map_err(|_| NcmDecodeError::ReadSizeError)?;

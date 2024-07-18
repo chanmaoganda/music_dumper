@@ -1,11 +1,6 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum MusicDumpError {
-    
-}
-
-#[derive(Error, Debug)]
 pub enum NcmDecodeError {
     #[error("Read size do not match required size")]
     ReadSizeError,

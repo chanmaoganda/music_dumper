@@ -1,7 +1,5 @@
 mod decode;
-mod encode;
 mod rc4;
 
-pub use decode::*;
-pub use encode::*;
-pub use rc4::*;
+pub use decode::{ aes128_decrypt, base64_decode };
+pub use rc4::NcmRc4;

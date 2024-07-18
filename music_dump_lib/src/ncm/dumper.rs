@@ -4,6 +4,13 @@ use crate::{NcmDecoder, NcmMusic};
 
 use rayon::prelude::*;
 
+/// General handler to dump NCM files to mp3
+/// 
+/// # Fields
+/// 
+/// `music_list`: List of paths to NCM files to be dumped
+/// 
+/// `output_directory`: Directory where the dumped files will be saved
 pub struct NcmDumper {
     music_list: Vec<PathBuf>,
     output_directory: PathBuf

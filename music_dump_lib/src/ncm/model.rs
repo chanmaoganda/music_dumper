@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::NcmDecodeError;
 
+/// An enum to receive possible types of NCM ID. either a string or an integer
 #[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum NcmId {
@@ -23,6 +24,7 @@ impl NcmId {
     }
 }
 
+/// Parse json to the raw struct and convert it to the NcmInfo struct
 #[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct RawNcmInfo {
     #[serde(rename = "musicName")]
@@ -39,6 +41,7 @@ pub struct RawNcmInfo {
     pub alias: Option<Vec<String>>,
 }
 
+/// Stores metadata of a NCM file
 #[derive(Debug, Eq, PartialEq)]
 pub struct NcmInfo {
     pub name: String,

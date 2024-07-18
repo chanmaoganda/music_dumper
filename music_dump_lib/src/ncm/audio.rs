@@ -1,5 +1,8 @@
 use crate::NcmRc4;
 
+/// Decrypt audio in encrypted byte stream to decrypted byte stream that can be write into mp3
+/// use rc4 to decrypt the audio
+/// See [`NcmDecoder::decode`]
 pub struct Audio {
     ncm_rc4: NcmRc4,
     encrypted: Vec<u8>,

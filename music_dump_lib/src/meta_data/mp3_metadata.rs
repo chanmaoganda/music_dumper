@@ -1,10 +1,6 @@
-use std::path::PathBuf;
-
 use id3::{frame, TagLike};
 
-use crate::{guess_pict_type, NcmInfo};
-
-use super::metadata::MetaData;
+use crate::{guess_pict_type, NcmInfo, MetaData};
 
 pub struct Mp3MetaData {
     tag: id3::Tag,
@@ -33,7 +29,7 @@ impl Mp3MetaData {
 }
 
 impl MetaData for Mp3MetaData {
-    fn inject(&mut self, path_buf: &PathBuf) {
+    fn inject(&mut self, path_buf: &std::path::PathBuf) {
         self.tag.write_to_path(path_buf, id3::Version::Id3v23).unwrap();
     }
 }
