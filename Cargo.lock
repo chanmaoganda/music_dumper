@@ -708,6 +708,7 @@ dependencies = [
  "rayon",
  "serde",
  "serde_json",
+ "tc_tea",
  "thiserror",
 ]
 
@@ -1102,6 +1103,16 @@ name = "target-lexicon"
 version = "0.12.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4873307b7c257eddcb50c9bedf158eb669578359fb28428bef438fec8e6ba7c2"
+
+[[package]]
+name = "tc_tea"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cab26285e70ee5cbec8582c76b8124dfe65b564b43dad14b9caca6fd127d66d2"
+dependencies = [
+ "rand",
+ "rand_chacha",
+]
 
 [[package]]
 name = "thiserror"

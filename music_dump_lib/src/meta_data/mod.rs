@@ -4,7 +4,7 @@ mod flac_metadata;
 
 use image::{guess_format, ImageFormat};
 pub use metadata::MetaData;
-pub use metadata::metadata_builder;
+pub use metadata::ncm_metadata_builder;
 pub use mp3_metadata::*;
 pub use flac_metadata::*;
 

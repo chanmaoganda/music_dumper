@@ -33,7 +33,7 @@ impl NcmDecoder {
         let _ = self.take_next_bytes(9)?;
         let image = self.parse_image()?;
         let audio = self.parse_audio(ncm_rc4)?;
-        let metadata = meta_data::metadata_builder(&music_type, ncm_info, image);
+        let metadata = meta_data::ncm_metadata_builder(&music_type, ncm_info, image);
 
         Ok(NcmMusic::new(metadata, music_type, audio))
     }

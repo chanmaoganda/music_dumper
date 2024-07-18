@@ -15,3 +15,4 @@ id3 = { workspace = true }
 metaflac = { workspace = true }
 image = { workspace = true, default-features = false }
 rayon = { workspace = true }
+tc_tea = { workspace = true }

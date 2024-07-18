@@ -34,3 +34,4 @@ metaflac = { version = "0.2.7" }
 rayon = "1.10.0"
 glob = "0.3.1"
 clap = { version = "4.5.0", features = ["derive"] }
+tc_tea = "0.1.4"
