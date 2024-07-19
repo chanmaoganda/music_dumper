@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::{Read, Seek};
-use std::path::PathBuf;
+use std::path::Path;
 
 use crate::{crypt, meta_data};
 use crate::NcmDecodeError;
@@ -29,7 +29,7 @@ pub struct NcmDecoder {
 }
 
 impl NcmDecoder {
-    pub fn new(path: &PathBuf) -> Self {
+    pub fn new(path: impl AsRef<Path>) -> Self {
         let reader = File::open(path).unwrap();
         NcmDecoder {
             reader,
