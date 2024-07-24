@@ -4,7 +4,6 @@ use anyhow::Error;
 use clap::Parser;
 use glob::glob;
 
-
 #[derive(Debug, Parser)]
 #[command(name = "dump", bin_name = "dump")]
 pub struct Command {
@@ -13,7 +12,6 @@ pub struct Command {
     #[arg(short = 'o', long = "out")]
     pub output_path: Option<String>,
 }
-
 
 impl Command {
     pub fn get_items(&self) -> anyhow::Result<Vec<PathBuf>> {
@@ -44,7 +42,9 @@ impl Command {
                 return Ok(path);
             }
         }
-        Err(Error::msg("No output path provided and default paths are occupied"))
+        Err(Error::msg(
+            "No output path provided and default paths are occupied",
+        ))
     }
 }
 

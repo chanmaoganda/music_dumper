@@ -11,7 +11,7 @@ fn main() -> anyhow::Result<()> {
     let music_list = command.get_items()?;
     let output_directory = PathBuf::from(command.get_output_path()?);
     if !output_directory.exists() {
-        return Err(anyhow::Error::msg("Output directory does not exist"))
+        return Err(anyhow::Error::msg("Output directory does not exist"));
     }
     let ncm_dumper = NcmDumper::new(music_list, output_directory);
     ncm_dumper.dump_all()?;

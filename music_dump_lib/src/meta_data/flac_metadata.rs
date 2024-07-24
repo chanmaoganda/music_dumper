@@ -7,7 +7,8 @@ pub struct FlacMetadata {
 impl FlacMetadata {
     pub fn new(ncm_info: NcmInfo, image: Vec<u8>) -> Self {
         let mut tag = metaflac::Tag::new();
-        let artist_vec = ncm_info.artist
+        let artist_vec = ncm_info
+            .artist
             .into_iter()
             .map(|(name, _)| name)
             .collect::<Vec<String>>();
@@ -19,7 +20,8 @@ impl FlacMetadata {
         tag.add_picture(
             guess_pict_type(&image),
             metaflac::block::PictureType::CoverFront,
-            image);
+            image,
+        );
         Self { tag }
     }
 }

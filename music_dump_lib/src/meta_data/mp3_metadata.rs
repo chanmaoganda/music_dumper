@@ -1,6 +1,6 @@
 use id3::{frame, TagLike};
 
-use crate::{guess_pict_type, NcmInfo, MetaData};
+use crate::{guess_pict_type, MetaData, NcmInfo};
 
 pub struct Mp3MetaData {
     tag: id3::Tag,
@@ -9,7 +9,8 @@ pub struct Mp3MetaData {
 impl Mp3MetaData {
     pub fn new(ncm_info: NcmInfo, image: Vec<u8>) -> Self {
         let mut tag = id3::Tag::new();
-        let artist_string = ncm_info.artist
+        let artist_string = ncm_info
+            .artist
             .into_iter()
             .map(|(name, _)| name)
             .collect::<Vec<String>>()
@@ -30,6 +31,8 @@ impl Mp3MetaData {
 
 impl MetaData for Mp3MetaData {
     fn inject(&mut self, path_buf: &std::path::PathBuf) {
-        self.tag.write_to_path(path_buf, id3::Version::Id3v23).unwrap();
+        self.tag
+            .write_to_path(path_buf, id3::Version::Id3v23)
+            .unwrap();
     }
 }
