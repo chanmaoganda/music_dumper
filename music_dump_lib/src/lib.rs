@@ -1,11 +1,10 @@
-mod crypt;
-mod error;
-mod meta_data;
 mod ncm;
+mod error;
+mod crypt;
+mod meta_data;
 
 use crypt::*;
-use meta_data::guess_pict_type;
 
-pub use error::NcmDecodeError;
-pub use meta_data::{FlacMetadata, MetaData, Mp3MetaData};
 pub use ncm::*;
+pub use error::NcmDecodeError;
+pub use meta_data::LoftyMetaData;

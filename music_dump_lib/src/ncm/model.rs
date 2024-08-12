@@ -61,11 +61,9 @@ impl From<RawNcmInfo> for NcmInfo {
             name: raw_info.name,
             id: raw_info.id.get_id().unwrap_or(0),
             album: raw_info.album,
-            artist: raw_info
-                .artist
-                .into_iter()
-                .map(|(name, id)| (name, id.get_id().unwrap_or(0)))
-                .collect(),
+            artist: raw_info.artist.into_iter()
+               .map(|(name, id)| (name, id.get_id().unwrap_or(0)))
+               .collect(),
             bitrate: raw_info.bitrate.get_id().unwrap_or(0),
             duration: raw_info.duration.get_id().unwrap_or(0),
             format: raw_info.format,

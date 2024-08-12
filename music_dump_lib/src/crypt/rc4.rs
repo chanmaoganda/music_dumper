@@ -9,21 +9,23 @@ impl NcmRc4 {
         let mut state = [0u8; 256];
         Self::ncm_prga(&mut state, &Self::ksa(key));
         let rc4_iter: Rc4Iter = state.into_iter().cycle();
-        Self { rc4_iter }
+        Self {
+            rc4_iter,
+        }
     }
 
     pub fn decrypt(&self, buf: &mut [u8]) {
-        buf.iter_mut()
-            .zip(self.rc4_iter.clone())
-            .for_each(|(byte, x)| *byte = *byte ^ x)
+        buf.iter_mut().zip(self.rc4_iter.clone())
+            .for_each(|(byte, x)| *byte ^= x)
     }
 
     fn ksa(key: &[u8]) -> [u8; 256] {
         let mut state = [0; 256];
 
-        state.iter_mut().enumerate().for_each(|(index, byte)| {
-            *byte = index as u8;
-        });
+        state.iter_mut().enumerate()
+            .for_each(|(index, byte)| {
+                *byte = index as u8;
+            });
 
         let key_iter = key.iter().cycle();
         let mut j = 0u8;

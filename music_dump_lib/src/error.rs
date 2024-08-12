@@ -23,7 +23,7 @@ pub enum NcmDecodeError {
 }
 
 impl From<CryptError> for NcmDecodeError {
-    fn from(_: CryptError) -> Self {
+    fn from(_ : CryptError) -> Self {
         NcmDecodeError::CryptError
     }
 }
