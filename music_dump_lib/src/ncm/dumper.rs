@@ -33,7 +33,7 @@ impl NcmDumper {
         let stream = std::fs::read(path_buf)?;
         let mut decoder = NcmDecoder::from_reader(Cursor::new(stream));
         let NcmMusic { 
-            metadata,
+            metadata: _,
             music_type,
             audio_data 
         } = decoder.decode()?;
@@ -45,7 +45,7 @@ impl NcmDumper {
             .truncate(true)
             .open(&path)?;
         file.write_all(&audio_data)?;
-        metadata.inject_to_path(path);
+        // metadata.inject_to_path(path);
         Ok(())
     }
 }
